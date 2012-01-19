@@ -5,7 +5,8 @@
 
 //$hash = md5($_POST['imagedata']);
 $hash = md5($_POST['imagedata']);
-$dir = date("YmdHis");
+$dir = date("Ymd");
+$now = date("YmdHis");
 $fname = $dir . '/' . $hash . '.png';
 if (!is_dir("data/{$dir}")) {
     mkdir("data/{$dir}");
