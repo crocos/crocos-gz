@@ -1,0 +1,37 @@
+{% extends 'layout.html.twig' %}
+
+{% block main %}
+<div id="main" class="main main-file">
+    {% if file is not null %}
+
+    <p>
+    <button type="button" class="btn btn-primary hide" id="fileUrlButton" data-clipboard-text="{{ request.uri }}">URLをコピー</button>
+      <span class="label label-success hide" id="copyMsg">コピーしました</span>
+      <span class="" id="copyText"></span>
+    </p>
+    <p>
+      <a href="{{ file }}"><img src="{{ file }}" class="img-thumbnail" /></a>
+    </p>
+    <script type="text/javascript">
+    $(function() {
+      if (isFlashEnabled()) {
+        $("#fileUrlButton").removeClass('hide');
+
+        var clip = new ZeroClipboard(document.getElementById("fileUrlButton"), {
+          moviePath: "/js/ZeroClipboard.swf"
+        });
+        clip.on('complete', function(client, args) {
+          $("#copyMsg").removeClass('hide').fadeOut(1500);
+          $("#copyText").html(args.text);
+        });
+      } else {
+      }
+    });
+    </script>
+    {% else %}
+      404 File Not Found.
+    {% endif %}
+
+</div>
+{% endblock main %}
+

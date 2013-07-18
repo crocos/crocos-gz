@@ -1,0 +1,78 @@
+#!/usr/bin/env ruby
+
+require 'net/http'
+
+version = '{{ client_version }}'
+
+program = ARGV[0].to_s
+idfile = File.dirname(program) + "/{{ client_app_name }}/Contents/Resources/id"
+
+id = ''
+if File.exist?(idfile) then
+  id = File.read(idfile).chomp
+else
+  id = Time.new.strftime("%Y%m%d%H%M%S")
+  begin
+    File.open(idfile,"w").print(id+"\n")
+  rescue
+    id = ""
+  end
+end
+
+tmpfile = "/tmp/image_upload#{$$}.png"
+imagefile = ARGV[1]
+
+if imagefile && File.exist?(imagefile) then
+  system "sips -s format png \"#{imagefile}\" --out \"#{tmpfile}\""
+else
+  system "screencapture -i \"#{tmpfile}\""
+  if File.exist?(tmpfile) then
+    system "sips -d profile --deleteColorManagementProperties \"#{tmpfile}\""
+  end
+end
+
+if !File.exist?(tmpfile) then
+  exit
+end
+
+imagedata = File.read(tmpfile)
+File.delete(tmpfile)
+
+boundary = '----BOUNDARYBOUNDARY----'
+
+HOST = '{{ server_name }}'
+CGI = '/upload'
+
+data = <<EOF
+--#{boundary}\r
+content-disposition: form-data; name="id"\r
+\r
+#{id}\r
+--#{boundary}\r
+content-disposition: form-data; name="version"\r
+\r
+#{version}\r
+--#{boundary}\r
+content-disposition: form-data; name="imagedata"; filename="#{tmpfile}"\r
+content-type: image/png
+\r
+#{imagedata}\r
+--#{boundary}--\r
+EOF
+
+header ={
+  'Content-Length' => data.length.to_s,
+  'User-Agent' => '{{ client_user_agent }}',
+  'Content-type' => "multipart/form-data; boundary=#{boundary}",
+  'Authorization' => 'Basic bmVxdWFsOm5lcXVhbGhvZ2VwYXNz',
+}
+
+Net::HTTP.start(HOST,80){|http|
+  res = http.post(CGI,data,header)
+  url = res.response.to_ary[1]
+  IO.popen("pbcopy","r+"){|io|
+    io.write url
+    io.close
+  }
+  system "open #{url}"
+}
