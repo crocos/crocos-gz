@@ -1,0 +1,99 @@
+{% extends 'layout.html.twig' %}
+
+{% block main %}
+<div id="main" class="main">
+  <div class="container">
+    <h1>{{ config.app.title }}</h1>
+    <p>
+    {{ config.app.title }} へようこそ
+    </p>
+
+    <div class="panel">
+      <div class="panel-heading">Download &amp; Install</div>
+      <p>
+      Mac の場合、以下のボタンからダウンロードし、<code>gzclient.zip</code> を解凍後、<code>{{ config.client.app_name }}</code> を Applications フォルダに移動させてください。
+      </p>
+      <a href="gzclient.zip"><button type="button" class="btn btn-primary">Mac 用アプリのダウンロード v{{ config.client.version }}</button></a>
+    </div>
+
+
+    <h2>Upload</h2>
+    <p>
+    ブラウザで直接アップロードすることもできます。Windows 用のアプリが無いため、この画面を使ってください。<br>
+    </p>
+    <p>
+    社外秘のみ。
+    </p>
+    <p class="alert alert-danger"><strong>注意！</strong>「限定」以上の情報（個人情報等をふくむ画像）をアップロードしないでください。</p>
+
+    <div class="drop-area-outer">
+      <div class="well well-large drop-area" id="dropArea">
+        ここにアップロードしたい画像をドラッグ＆ドロップ
+      </div>
+      <div class="progress hide" id="dropAreaProgress">
+        <div class="progress-bar" style="width: 0%;"></div>
+      </div>
+      <div class="preview hide" id="dropAreaPreview">
+      </div>
+      <input id="multiple" type="file" class="hide" multiple>
+      </textarea>
+    </div>
+
+
+    <script type="text/javascript">
+    $(function() {
+
+      function onUploadError(e, file, str)
+      {
+        $('#dropAreaProgress .progress-bar').addClass('progress-bar-danger');
+        var $preview = $("#dropAreaPreview");
+        $preview.removeClass("hide");
+        $preview.append("<div class=\"alert alert-danger\">アップロード中にエラーが発生しました。" + (str || "") + "</div>");
+      }
+
+      function onUploadStart()
+      {
+        $("#dropAreaPreview").empty();
+        $('#dropAreaProgress .progress-bar').removeClass('progress-bar-danger');
+        $('#dropAreaProgress .progress-bar').css("width", "0%");
+      }
+
+      $("#dropArea, #multiple").html5Uploader({
+        name: "imagedata",
+        postUrl: "/upload",
+        onClientLoadStart: function(e, file) {
+          $('#dropAreaProgress').removeClass("hide");
+        },
+        onClientLoad: function(e,file) {
+          onUploadStart();
+          var $preview = $("#dropAreaPreview");
+          $preview.removeClass("hide");
+          $preview.append("<img src=\""+e.target.result+"\" alt=\"\" class=\"img-thumbnail\">");
+        },
+        onServerProgress: function(e) {
+          $('#dropAreaProgress .progress-bar').css("width", ((e.loaded / e.total) * 100 + "%"));
+        },
+        onServerReadyStateChange: function(e, file, state) {
+          if (state == 4 && e.currentTarget.status != 200) {
+            onUploadError(e, file, e.currentTarget.statusText);
+          }
+        },
+        onServerError: function(e, file) {
+          onUploadError(e, file);
+        },
+        onSuccess: function(e, file, res) {
+          var d = JSON.parse(res);
+          if (d.status == 'success') {
+            window.top.location = d.url;
+          } else {
+            onUploadError(e, file);
+          }
+        }
+      });
+    });
+    </script>
+
+
+  </div>
+</div>
+{% endblock main %}
