@@ -1,0 +1,16 @@
+<?php
+
+return [
+    'url' => 'http://example.com',
+    'secret' => 'php is a new black',
+
+    'client' => [
+        'app_name' => 'gzclient.app',
+        'version' => '1.0',
+        'user_agent' => 'gzclient v1.0',
+    ],
+
+    'app' => [
+        'title' => 'Gz',
+    ]
+];
