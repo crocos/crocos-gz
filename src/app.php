@@ -50,7 +50,7 @@ $app->post('/upload{suffix}', function(Application $app, Request $request) use (
     // from client
     if ($image = $request->files->get('imagedata')) {
         if ($image->getError() != UPLOAD_ERR_OK) {
-            return $app->json(['status' => 'failed', 'message' => $image->getErrorMessage()]);
+            return $app->json(['status' => 'failed', 'message' => 'ErrorCode: ' . $image->getError()]);
         }
     } else {
         return new Response('Error', 500);
