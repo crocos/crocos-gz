@@ -3,6 +3,7 @@
 # general
 GZ_SRC_DIR          = src
 GZ_WEB_DIR          = web
+GZ_LOG_DIR          = log
 GZ_CSS_DIR          = $(GZ_WEB_DIR)/stylesheets
 GZ_LESS_DIR         = src/less
 
@@ -58,6 +59,7 @@ submodule-update:
 
 install: submodule-update composer-install
 	chmod 777 $(GZ_DATA_DIR)
+	chmod 777 $(GZ_LOG_DIR)
 
 clean:
 	rm -r web/data/*

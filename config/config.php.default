@@ -4,6 +4,8 @@ return [
     'url' => 'http://example.com',
     'secret' => 'php is a new black',
 
+    'env' => 'prod',
+
     'client' => [
         'app_name' => 'gzclient.app',
         'version' => '1.0',

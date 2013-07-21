@@ -13,6 +13,7 @@
   },
   "require": {
     "silex/silex": "1.0.*",
-    "twig/twig": "1.*"
+    "twig/twig": "1.*",
+    "monolog/monolog": "1.5.*"
   }
 }

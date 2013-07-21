@@ -7,8 +7,10 @@ use Silex\Provider\TwigServiceProvider;
 use Silex\Provider\SessionServiceProvider;
 use Silex\Provider\DoctrineServiceProvider;
 
+use Monolog\Logger;
+
 $app['config'] = $config;
-$app['env'] = isset($app['config']['env']) ? (bool)$app['config']['env'] : 'prod';
+$app['env'] = isset($app['config']['env']) ? $app['config']['env'] : 'prod';
 
 
 // register session
@@ -24,6 +26,12 @@ $app['twig'] = $app->share($app->extend('twig', function($twig, $app) use ($conf
 
     return $twig;
 }));
+
+$app->register(new Silex\Provider\MonologServiceProvider(), [
+    'monolog.name' => 'gz',
+    'monolog.logfile' => ROOT_DIR . '/logs/' . $app['env'] . '.log',
+    'monolog.level' =>  $app['env'] === 'dev' ? Logger::DEBUG : Logger::ERROR,
+]);
 
 //$app['gz.upload_service'] = $app->share(function($app) {
 //    return new UploadService(
