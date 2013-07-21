@@ -8,6 +8,7 @@ use Silex\Provider\SessionServiceProvider;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Monolog\Logger;
 
 use Gz\Application;
 
@@ -55,7 +56,7 @@ $app->post('/upload{suffix}', function(Application $app, Request $request) use (
         return new Response('Error', 500);
     }
 
-    $ext = $image->getExtension();
+    $ext = $image->guessExtension();
     $name = sha1(uniqid() . $image->getClientOriginalName());
 
     $monthdir = (new DateTime())->format('Ymd');
@@ -65,6 +66,9 @@ $app->post('/upload{suffix}', function(Application $app, Request $request) use (
     }
 
     $fn = $name . '.' . $ext;
+
+    $app->debug($_FILES);
+    $app->debug('Upload: name=%s, ext=%s, PostData: originalName=%s, mime=%s', [$name, $ext, $image->getClientOriginalName(), $_POST['imagedata']['type']]);
 
     // TODO: service 化
     $file = $image->move("$basedir/$monthdir", $fn);
@@ -86,7 +90,6 @@ $app->match('/', $fallback = function(Application $app, Request $request) {
         'time'     => date('Y-m-d H:i:s'),
     ));
 });
-$app->get('/upload{suffix}', $fallback);
 
 $app->match('/{_any}', $fallback)->assert('_any', '.*');
 
