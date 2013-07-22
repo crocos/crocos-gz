@@ -86,7 +86,7 @@
           if (d.status == 'success') {
             window.top.location = d.url;
           } else {
-            onUploadError(e, file);
+            onUploadError(e, file, d.message || "");
           }
         }
       });
