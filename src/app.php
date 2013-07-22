@@ -21,16 +21,6 @@ require_once ROOT_DIR . '/config/di.php';
 $requiredLoginApi = function(Request $request) use($app) {
 };
 
-// FIXME monolog 使う
-function gzlog()
-{
-    $log = ROOT_DIR . '/web/data/log';
-    $vars = func_get_args();
-    foreach ($vars as $var) {
-        file_put_contents($log, var_export($var, true) . PHP_EOL, FILE_APPEND);
-    }
-}
-
 $app->get('/data/{ymd}/{file}', function(Application $app, Request $request, $ymd, $file) {
     $basedir = ROOT_DIR . '/web/data/';
     $files = glob($basedir . "$ymd/$file*");
@@ -57,6 +47,10 @@ $app->post('/upload{suffix}', function(Application $app, Request $request) use (
     }
 
     $ext = $image->guessExtension();
+    if (empty($ext)) {
+        $this->debug("Extention is empty: %s", [$ext]);
+        $this->debug($_FILES);
+    }
     $name = sha1(uniqid() . $image->getClientOriginalName());
 
     $monthdir = (new DateTime())->format('Ymd');
