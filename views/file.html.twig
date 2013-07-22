@@ -1,5 +1,13 @@
 {% extends 'layout.html.twig' %}
 
+{% block header_menu %}
+<ul class="nav navbar-nav">
+  <li><a href="/">Home</a></li>
+  {# <li><a href="#">Link</a></li> #}
+  {# <li class="disabled"><a href="#">Disabled</a></li> #}
+</ul>
+{% endblock header_menu %}
+
 {% block main %}
 <div id="main" class="main main-file">
     {% if file is not null %}
