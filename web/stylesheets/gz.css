@@ -5,12 +5,7 @@ body {
 .gz .main.main-file {
   margin: auto 10px;
 }
-.gz .navbar {
-  background: #333;
-  color: #cfcfcf;
-}
 .gz .navbar .navbar-brand {
-  color: #cfcfcf;
   font-weight: bold;
 }
 .gz .navbar .confidential {
