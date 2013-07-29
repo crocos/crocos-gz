@@ -62,7 +62,7 @@ $app->post('/upload{suffix}', function(Application $app, Request $request) use (
     $fn = $name . '.' . $ext;
 
     $app->debug($_FILES);
-    $app->debug('Upload: name=%s, ext=%s, PostData: originalName=%s, mime=%s', [$name, $ext, $image->getClientOriginalName(), $_POST['imagedata']['type']]);
+    $app->debug('Upload: name=%s, ext=%s, PostData: originalName=%s, mime=%s', [$name, $ext, $image->getClientOriginalName(), $_FILES['imagedata']['type']]);
 
     // TODO: service 化
     $file = $image->move("$basedir/$monthdir", $fn);
