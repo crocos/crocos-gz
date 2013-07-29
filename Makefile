@@ -51,8 +51,8 @@ composer-update: composer-download
 bootstrap:
 	cd $(GZ_TWB_SRC_DIR) ;\
 	npm install ;\
-	make bootstrap
-	cp -a $(GZ_TWB_SRC_DIR)/bootstrap/* $(GZ_TWB_DIST_DIR)
+	grunt dist
+	cp -a $(GZ_TWB_SRC_DIR)/dist/* $(GZ_TWB_DIST_DIR)
 
 submodule-update:
 	git submodule update --init
