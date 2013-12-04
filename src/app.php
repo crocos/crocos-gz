@@ -70,7 +70,7 @@ $app->post('/upload{suffix}', function(Application $app, Request $request) use (
 
     if (false !== strpos($request->headers->get('User-Agent'), $config['client']['user_agent'])) {
         if ($request->get('version') != $config['client']['version']) {
-            $url = "Client version outdated. Please visit {$config['url']} and download new client. " . $url;
+            $url .= '?client_outdated=1';
         }
         return $url;
     }

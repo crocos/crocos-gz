@@ -10,6 +10,12 @@
 
 {% block main %}
 <div id="main" class="main main-file">
+    {% if request.query.get('client_outdated') %}
+      <div class="alert">
+        お使いの Crocos Gz クライアントは古くなってます。<a href="/">最新版をダウンロード</a>してください。
+      </div>
+    {% endif %}
+
     {% if file is not null %}
 
     <p>
