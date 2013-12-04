@@ -4,21 +4,20 @@ require 'net/http'
 
 version = '{{ client_version }}'
 
+# get id
+user = IO.popen("whoami", "r+").gets.chomp
 program = ARGV[0].to_s
-idfile = File.dirname(program) + "/{{ client_app_name }}/Contents/Resources/id"
+idfile = "/Users/#{user}/Library/Gyazo/id"
+old_idfile = File.dirname(program) + "/{{ client_app_name }}/Contents/Resources/id"
 
 id = ''
 if File.exist?(idfile) then
   id = File.read(idfile).chomp
-else
-  id = Time.new.strftime("%Y%m%d%H%M%S")
-  begin
-    File.open(idfile,"w").print(id+"\n")
-  rescue
-    id = ""
-  end
+elsif File.exist?(old_idfile) then
+  id = File.read(old_idfile).chomp
 end
 
+# capture png file
 tmpfile = "/tmp/image_upload#{$$}.png"
 imagefile = ARGV[1]
 
@@ -27,7 +26,16 @@ if imagefile && File.exist?(imagefile) then
 else
   system "screencapture -i \"#{tmpfile}\""
   if File.exist?(tmpfile) then
-    system "sips -d profile --deleteColorManagementProperties \"#{tmpfile}\""
+    system "sips -d profile --deleteColorManagementProperties \"#{tmpfile}\""  
+    dpiWidth    = `sips -g dpiWidth "#{tmpfile}" | awk '/:/ {print $2}'`
+    dpiHeight   = `sips -g dpiHeight "#{tmpfile}" | awk '/:/ {print $2}'`
+    pixelWidth  = `sips -g pixelWidth "#{tmpfile}" | awk '/:/ {print $2}'`
+    pixelHeight = `sips -g pixelHeight "#{tmpfile}" | awk '/:/ {print $2}'`
+    if (dpiWidth.to_f > 72.0 and dpiHeight.to_f > 72.0) then
+        width  =  pixelWidth.to_f * 72.0 / dpiWidth.to_f
+        height =  pixelHeight.to_f* 72.0 / dpiHeight.to_f
+        system "sips -s dpiWidth 72 -s dpiHeight 72 -z #{height} #{width} \"#{tmpfile}\""
+    end
   end
 end
 
@@ -38,10 +46,12 @@ end
 imagedata = File.read(tmpfile)
 File.delete(tmpfile)
 
+# upload
 boundary = '----BOUNDARYBOUNDARY----'
 
 HOST = '{{ server_name }}'
 CGI = '/upload'
+UA   = '{{ client_user_agent }}'
 
 data = <<EOF
 --#{boundary}\r
@@ -53,8 +63,7 @@ content-disposition: form-data; name="version"\r
 \r
 #{version}\r
 --#{boundary}\r
-content-disposition: form-data; name="imagedata"; filename="#{tmpfile}"\r
-content-type: image/png
+content-disposition: form-data; name="imagedata"; filename="gyazo.com"\r
 \r
 #{imagedata}\r
 --#{boundary}--\r
@@ -62,17 +71,32 @@ EOF
 
 header ={
   'Content-Length' => data.length.to_s,
-  'User-Agent' => '{{ client_user_agent }}',
   'Content-type' => "multipart/form-data; boundary=#{boundary}",
   'Authorization' => 'Basic bmVxdWFsOm5lcXVhbGhvZ2VwYXNz',
+  'User-Agent' => UA,
 }
 
 Net::HTTP.start(HOST,80){|http|
   res = http.post(CGI,data,header)
-  url = res.response.to_ary[1]
+  url = res.response.body
   IO.popen("pbcopy","r+"){|io|
     io.write url
     io.close
   }
   system "open #{url}"
+
+  # save id
+  newid = res.response['X-Gyazo-Id']
+  if newid and newid != "" then
+    if !File.exist?(File.dirname(idfile)) then
+      Dir.mkdir(File.dirname(idfile))
+    end
+    if File.exist?(idfile) then
+      File.rename(idfile, idfile+Time.new.strftime("_%Y%m%d%H%M%S.bak"))
+    end
+    File.open(idfile,"w").print(newid)
+    if File.exist?(old_idfile) then
+      File.delete(old_idfile)
+    end
+  end
 }
